@@ -1,0 +1,38 @@
+{
+  "@@locale": "en",
+  "appTitle": "Vocabulary Builder",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "selectLanguage": "Select Language",
+  "japanese": "Japanese",
+  "english": "English",
+  "selectGame": "Select Game",
+  "wordReplacement": "Word Replacement",
+  "wordReplacementDescription": "Find synonyms and alternative expressions",
+  "rhyming": "Rhyming",
+  "rhymingDescription": "Find words that rhyme with the given word",
+  "todaysWord": "Today's Word",
+  "startGame": "Start Game",
+  "timeLimit": "Time Limit",
+  "seconds": "{count} seconds",
+  "@seconds": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "enterYourAnswers": "Enter your answers",
+  "submit": "Submit",
+  "score": "Score",
+  "feedback": "Feedback",
+  "playAgain": "Play Again",
+  "backToMenu": "Back to Menu",
+  "scoreHistory": "Score History",
+  "noScoresYet": "No scores yet",
+  "loading": "Loading...",
+  "error": "Error",
+  "retry": "Retry",
+  "settings": "Settings"
+}

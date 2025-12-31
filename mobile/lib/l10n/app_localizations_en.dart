@@ -1,0 +1,88 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for English (`en`).
+class AppLocalizationsEn extends AppLocalizations {
+  AppLocalizationsEn([String locale = 'en']) : super(locale);
+
+  @override
+  String get appTitle => 'Vocabulary Builder';
+
+  @override
+  String get selectLanguage => 'Select Language';
+
+  @override
+  String get japanese => 'Japanese';
+
+  @override
+  String get english => 'English';
+
+  @override
+  String get selectGame => 'Select Game';
+
+  @override
+  String get wordReplacement => 'Word Replacement';
+
+  @override
+  String get wordReplacementDescription =>
+      'Find synonyms and alternative expressions';
+
+  @override
+  String get rhyming => 'Rhyming';
+
+  @override
+  String get rhymingDescription => 'Find words that rhyme with the given word';
+
+  @override
+  String get todaysWord => 'Today\'s Word';
+
+  @override
+  String get startGame => 'Start Game';
+
+  @override
+  String get timeLimit => 'Time Limit';
+
+  @override
+  String seconds(int count) {
+    return '$count seconds';
+  }
+
+  @override
+  String get enterYourAnswers => 'Enter your answers';
+
+  @override
+  String get submit => 'Submit';
+
+  @override
+  String get score => 'Score';
+
+  @override
+  String get feedback => 'Feedback';
+
+  @override
+  String get playAgain => 'Play Again';
+
+  @override
+  String get backToMenu => 'Back to Menu';
+
+  @override
+  String get scoreHistory => 'Score History';
+
+  @override
+  String get noScoresYet => 'No scores yet';
+
+  @override
+  String get loading => 'Loading...';
+
+  @override
+  String get error => 'Error';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get settings => 'Settings';
+}
