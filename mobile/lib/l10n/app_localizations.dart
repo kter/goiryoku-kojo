@@ -185,7 +185,7 @@ abstract class AppLocalizations {
   /// No description provided for @submit.
   ///
   /// In en, this message translates to:
-  /// **'Submit'**
+  /// **'Done'**
   String get submit;
 
   /// No description provided for @score.

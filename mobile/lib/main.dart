@@ -7,6 +7,10 @@ import 'l10n/app_localizations.dart';
 import 'providers/providers.dart';
 import 'screens/screens.dart';
 
+/// Global RouteObserver for tracking route changes
+final RouteObserver<ModalRoute<void>> routeObserver =
+    RouteObserver<ModalRoute<void>>();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
@@ -59,6 +63,7 @@ class GoiryokuKojoApp extends ConsumerWidget {
       themeMode: ThemeMode.system,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
+      navigatorObservers: [routeObserver],
       home: const HomeScreen(),
     );
   }

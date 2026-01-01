@@ -236,18 +236,22 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen> {
                                 ),
                           ),
                         )
-                      : ListView.builder(
+                      : SingleChildScrollView(
                           padding: const EdgeInsets.all(8),
-                          itemCount: _answers.length,
-                          itemBuilder: (context, index) {
-                            return Chip(
-                              label: Text(_answers[index]),
-                              onDeleted: _isSubmitting
-                                  ? null
-                                  : () => _removeAnswer(index),
-                              deleteIcon: const Icon(Icons.close, size: 18),
-                            );
-                          },
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            alignment: WrapAlignment.start,
+                            children: _answers.asMap().entries.map((entry) {
+                              return Chip(
+                                label: Text(entry.value),
+                                onDeleted: _isSubmitting
+                                    ? null
+                                    : () => _removeAnswer(entry.key),
+                                deleteIcon: const Icon(Icons.close, size: 18),
+                              );
+                            }).toList(),
+                          ),
                         ),
                 ),
               ),

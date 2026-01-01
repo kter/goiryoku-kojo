@@ -14,7 +14,7 @@
   "timeLimit": "制限時間",
   "seconds": "{count}秒",
   "enterYourAnswers": "回答を入力してください",
-  "submit": "送信",
+  "submit": "回答完了",
   "score": "スコア",
   "feedback": "フィードバック",
   "playAgain": "もう一度プレイ",

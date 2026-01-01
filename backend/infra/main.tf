@@ -133,6 +133,29 @@ data "archive_file" "generate_words_source" {
   }
 }
 
+# Archive for score_answers function
+data "archive_file" "score_answers_source" {
+  type        = "zip"
+  output_path = "${path.module}/tmp/score_answers.zip"
+
+  source {
+    content  = file("${path.module}/../functions/score_answers/main.py")
+    filename = "main.py"
+  }
+  source {
+    content  = file("${path.module}/../functions/score_answers/requirements.txt")
+    filename = "requirements.txt"
+  }
+  source {
+    content  = file("${path.module}/../functions/shared/gemini_client.py")
+    filename = "gemini_client.py"
+  }
+  source {
+    content  = file("${path.module}/../functions/shared/__init__.py")
+    filename = "__init__.py"
+  }
+}
+
 # Upload get_words source
 resource "google_storage_bucket_object" "get_words_source" {
   name   = "get_words-${data.archive_file.get_words_source.output_md5}.zip"
@@ -224,6 +247,66 @@ resource "google_cloudfunctions2_function" "generate_words" {
 resource "google_cloud_run_service_iam_member" "get_words_invoker" {
   location = google_cloudfunctions2_function.get_words.location
   service  = google_cloudfunctions2_function.get_words.name
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
+
+# Allow service account to invoke generate_words (for Cloud Scheduler)
+resource "google_cloud_run_service_iam_member" "generate_words_invoker" {
+  location = google_cloudfunctions2_function.generate_words.location
+  service  = google_cloudfunctions2_function.generate_words.name
+  role     = "roles/run.invoker"
+  member   = "serviceAccount:${google_service_account.functions_sa.email}"
+}
+
+# Upload score_answers source
+resource "google_storage_bucket_object" "score_answers_source" {
+  name   = "score_answers-${data.archive_file.score_answers_source.output_md5}.zip"
+  bucket = google_storage_bucket.functions_bucket.name
+  source = data.archive_file.score_answers_source.output_path
+}
+
+# Cloud Function: score_answers (Gen 2)
+resource "google_cloudfunctions2_function" "score_answers" {
+  name     = "score-answers"
+  location = var.region
+
+  build_config {
+    runtime     = "python311"
+    entry_point = "score_answers"
+
+    source {
+      storage_source {
+        bucket = google_storage_bucket.functions_bucket.name
+        object = google_storage_bucket_object.score_answers_source.name
+      }
+    }
+  }
+
+  service_config {
+    max_instance_count    = 10
+    min_instance_count    = 0
+    available_memory      = "512M"
+    timeout_seconds       = 60
+    service_account_email = google_service_account.functions_sa.email
+
+    environment_variables = {
+      GCP_PROJECT = var.project_id
+    }
+  }
+
+  depends_on = [
+    google_project_service.cloudfunctions,
+    google_project_service.run,
+    google_project_service.cloudbuild,
+    google_project_service.aiplatform
+  ]
+}
+
+# Allow unauthenticated access to score_answers
+resource "google_cloud_run_service_iam_member" "score_answers_invoker" {
+  location = google_cloudfunctions2_function.score_answers.location
+  service  = google_cloudfunctions2_function.score_answers.name
   role     = "roles/run.invoker"
   member   = "allUsers"
 }

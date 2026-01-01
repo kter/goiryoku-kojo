@@ -1,21 +1,23 @@
 """Batch function to generate vocabulary words using Gemini 1.5 Flash."""
 
 import logging
+import os
+import traceback
 from datetime import date, timedelta
 from http import HTTPStatus
 
 import functions_framework
 from flask import Request, Response
 
-# Add shared module to path
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'shared'))
-
+# In Cloud Functions, all source files are bundled in the same directory
 from firestore_client import FirestoreClient
 from gemini_client import GeminiClient, GeminiClientError
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Get project ID from environment variable
+PROJECT_ID = os.environ.get("GCP_PROJECT")
 
 
 def get_missing_dates(
@@ -60,9 +62,11 @@ def generate_words(request: Request) -> Response:
         JSON response with generation results.
     """
     try:
-        # Initialize clients
-        firestore_client = FirestoreClient()
-        gemini_client = GeminiClient()
+        logger.info(f"Starting generate_words function. PROJECT_ID={PROJECT_ID}")
+        
+        # Initialize clients with explicit project ID
+        firestore_client = FirestoreClient(project_id=PROJECT_ID)
+        gemini_client = GeminiClient(project_id=PROJECT_ID)
         
         # Define date range: today to 7 days ahead
         today = date.today()
@@ -114,6 +118,7 @@ def generate_words(request: Request) -> Response:
         
     except GeminiClientError as e:
         logger.error(f"Gemini API error: {e}")
+        logger.error(traceback.format_exc())
         return Response(
             f'{{"success": false, "error": "AI generation failed: {str(e)}"}}',
             status=HTTPStatus.INTERNAL_SERVER_ERROR,
@@ -121,8 +126,9 @@ def generate_words(request: Request) -> Response:
         )
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
+        logger.error(traceback.format_exc())
         return Response(
-            f'{{"success": false, "error": "Internal server error"}}',
+            f'{{"success": false, "error": "Internal server error: {str(e)}"}}',
             status=HTTPStatus.INTERNAL_SERVER_ERROR,
             mimetype="application/json"
         )

@@ -3,15 +3,50 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../l10n/app_localizations.dart';
 import '../models/models.dart';
 import '../providers/providers.dart';
+import '../main.dart';
 import 'game_setup_screen.dart';
 import 'score_history_screen.dart';
 
 /// Home screen with game selection
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Subscribe to route changes
+    // Subscribe to route changes
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    // Called when this screen becomes visible again after a pop
+    ref.invalidate(todaysWordProvider);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Invalidate on first load as well
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.invalidate(todaysWordProvider);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final todaysWord = ref.watch(todaysWordProvider);
 

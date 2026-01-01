@@ -53,7 +53,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get enterYourAnswers => '回答を入力してください';
 
   @override
-  String get submit => '送信';
+  String get submit => '回答完了';
 
   @override
   String get score => 'スコア';

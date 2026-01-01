@@ -21,9 +21,9 @@ class GeminiParseError(GeminiClientError):
 
 
 class GeminiClient:
-    """Client for generating vocabulary words using Gemini 1.5 Flash."""
+    """Client for generating vocabulary words using Gemini 2.5 Flash."""
 
-    MODEL_NAME = "gemini-1.5-flash"
+    MODEL_NAME = "gemini-2.5-flash"
     
     SYSTEM_PROMPT = """あなたは日本語の語彙力トレーニングアプリのための単語生成AIです。
 
@@ -68,7 +68,7 @@ class GeminiClient:
         )
         self._generation_config = GenerationConfig(
             temperature=0.8,
-            max_output_tokens=2048,
+            max_output_tokens=8192,
             response_mime_type="application/json"
         )
 
@@ -167,3 +167,113 @@ class GeminiClient:
             
         except json.JSONDecodeError as e:
             raise GeminiParseError(f"Failed to parse JSON: {e}") from e
+
+    def score_answers(
+        self,
+        word: str,
+        answers: list[str],
+        game_type: str,
+    ) -> dict:
+        """Score user answers for vocabulary game.
+        
+        Args:
+            word: The target word (お題).
+            answers: List of user's answers.
+            game_type: "word_replacement" or "rhyming".
+            
+        Returns:
+            Dictionary with score (0-100) and feedback.
+            
+        Raises:
+            GeminiClientError: For API errors.
+        """
+        game_context = self._get_game_context(game_type)
+        
+        system_prompt = f"""あなたは言語学の専門家です。提示された『お題』に対して、ユーザーが入力した『単語リスト』を以下の基準で採点し、JSON形式で返してください。
+
+評価基準：
+{game_context}
+
+回答形式（必ずこの形式のJSONで返してください）：
+{{
+  "score": <0-100の整数>,
+  "feedback": "<採点理由と改善点を含む日本語のフィードバック>"
+}}
+
+採点のポイント：
+- 各単語は最大10点
+- 最大10単語まで採点（100点満点）
+- 重複した単語は採点しない
+- 不適切または無関係な単語は0点
+- 創造性と語彙力の豊かさを評価"""
+
+        game_type_name = "言葉の置き換え" if game_type == "word_replacement" else "韻を踏む"
+        answers_text = "\n".join(f"・{a}" for a in answers) if answers else "（回答なし）"
+        
+        user_prompt = f"""【ゲーム種別】{game_type_name}
+
+【お題】{word}
+
+【ユーザーの回答】
+{answers_text}
+
+上記の回答を採点してください。"""
+
+        try:
+            model = GenerativeModel(
+                self.MODEL_NAME,
+                system_instruction=system_prompt,
+            )
+            
+            config = GenerationConfig(
+                temperature=0.7,
+                max_output_tokens=8192,
+                response_mime_type="application/json",
+            )
+            
+            response = model.generate_content(user_prompt, generation_config=config)
+            return self._parse_score_response(response.text)
+            
+        except Exception as e:
+            logger.error(f"Gemini API error during scoring: {e}")
+            raise GeminiClientError(f"Scoring API error: {e}") from e
+
+    def _get_game_context(self, game_type: str) -> str:
+        """Get evaluation context for the game type."""
+        if game_type == "word_replacement":
+            return """【言葉の置き換えゲーム】
+- お題の単語と同じ意味、または類似の意味を持つ単語を評価
+- 同義語、類義語としての適切さを重視
+- より洗練された表現や専門的な言い換えは高得点"""
+        else:
+            return """【韻を踏むゲーム】
+- お題の単語と韻を踏んでいるか（語尾の音が一致しているか）を評価
+- 単なる音の一致だけでなく、言葉としての面白さも評価
+- 創造的で意外性のある韻は高得点"""
+
+    def _parse_score_response(self, response_text: str) -> dict:
+        """Parse the scoring response."""
+        try:
+            cleaned = response_text.strip()
+            if cleaned.startswith("```json"):
+                cleaned = cleaned[7:]
+            if cleaned.startswith("```"):
+                cleaned = cleaned[3:]
+            if cleaned.endswith("```"):
+                cleaned = cleaned[:-3]
+            cleaned = cleaned.strip()
+            
+            data = json.loads(cleaned)
+            
+            return {
+                "score": int(data.get("score", 0)),
+                "feedback": str(data.get("feedback", "")),
+            }
+            
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.error(f"Failed to parse score response: {e}")
+            return {
+                "score": 0,
+                "feedback": "スコアの解析に失敗しました。",
+            }
+

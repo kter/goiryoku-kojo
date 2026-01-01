@@ -54,7 +54,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get enterYourAnswers => 'Enter your answers';
 
   @override
-  String get submit => 'Submit';
+  String get submit => 'Done';
 
   @override
   String get score => 'Score';

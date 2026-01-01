@@ -8,12 +8,11 @@ from http import HTTPStatus
 import functions_framework
 from flask import Request, Response
 
-# Add shared module to path
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'shared'))
-
+# In Cloud Functions, all source files are bundled in the same directory
 from firestore_client import FirestoreClient
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 logger = logging.getLogger(__name__)
 

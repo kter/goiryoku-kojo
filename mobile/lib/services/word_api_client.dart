@@ -3,7 +3,7 @@ import '../models/models.dart';
 
 /// API client for fetching word of the day data
 class WordApiClient {
-  static const String _baseUrl = 'https://api.word-of-the-day.devtools.site';
+  static const String _baseUrl = 'https://get-words-cqiy6alq3a-an.a.run.app';
   static const int _defaultDays = 30;
 
   final Dio _dio;
@@ -20,7 +20,7 @@ class WordApiClient {
   Future<WordListResponse> fetchWords({int days = _defaultDays}) async {
     try {
       final response = await _dio.get<Map<String, dynamic>>(
-        '/v1/word',
+        '/',
         queryParameters: {'days': days},
       );
 
@@ -35,23 +35,20 @@ class WordApiClient {
   }
 
   /// Fetch word for a specific date
+  /// Fetches the word list and filters for the specific date
   Future<Word> fetchWordForDate(DateTime date) async {
-    try {
-      final dateStr =
-          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    final dateStr =
+        '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 
-      final response = await _dio.get<Map<String, dynamic>>(
-        '/v1/word/$dateStr',
-      );
-
-      if (response.data != null) {
-        return Word.fromJson(response.data!);
-      }
-
-      throw Exception('Empty response from server');
-    } on DioException catch (e) {
-      throw _handleDioError(e);
+    final response = await fetchWords();
+    
+    final word = response.words.where((w) => w.date == dateStr).firstOrNull;
+    
+    if (word != null) {
+      return word;
     }
+    
+    throw Exception('Word not found for the requested date: $dateStr');
   }
 
   Exception _handleDioError(DioException e) {
