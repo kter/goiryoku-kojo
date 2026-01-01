@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="goiryoku_kojo"
+        android:label="語彙力向上"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
