@@ -20,17 +20,12 @@ dependencies:
   # State Management
   flutter_riverpod: ^2.6.1
 
-  # AI Integration
-  google_generative_ai: ^0.4.6
-
   # Networking
   dio: ^5.7.0
 
   # Local Storage
   shared_preferences: ^2.3.3
 
-  # Environment Variables
-  flutter_dotenv: ^5.2.1
 
   # Internationalization
   intl: ^0.20.2
@@ -51,6 +46,3 @@ flutter_launcher_icons:
 flutter:
   uses-material-design: true
   generate: true
-
-  assets:
-    - .env
