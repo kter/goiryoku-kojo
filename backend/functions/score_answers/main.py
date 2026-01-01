@@ -135,6 +135,7 @@ def score_answers(request: Request) -> Response:
         word = request_json.get("word")
         answers = request_json.get("answers", [])
         game_type = request_json.get("game_type")
+        locale = request_json.get("locale", "ja")  # Default to Japanese
 
         if not word:
             return Response(
@@ -208,6 +209,7 @@ def score_answers(request: Request) -> Response:
             word=word,
             answers=answers,
             game_type=game_type,
+            locale=locale,
         )
 
         response_data = {

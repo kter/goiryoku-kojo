@@ -62,10 +62,12 @@ class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
                           if (word == null) {
                             return const Text('---');
                           }
+                          final isJapanese = Localizations.localeOf(context).languageCode == 'ja';
+                          final displayWord = isJapanese ? word.word : word.wordEn.isNotEmpty ? word.wordEn : word.word;
                           return Column(
                             children: [
                               Text(
-                                word.word,
+                                displayWord,
                                 style: Theme.of(context)
                                     .textTheme
                                     .headlineLarge
@@ -73,7 +75,7 @@ class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
                                       fontWeight: FontWeight.bold,
                                     ),
                               ),
-                              if (word.reading.isNotEmpty) ...[
+                              if (isJapanese && word.reading.isNotEmpty) ...[
                                 const SizedBox(height: 4),
                                 Text(
                                   word.reading,

@@ -2,6 +2,7 @@
 class Word {
   final String id;
   final String word;
+  final String wordEn;
   final String reading;
   final String meaning;
   final String example;
@@ -10,6 +11,7 @@ class Word {
   Word({
     required this.id,
     required this.word,
+    required this.wordEn,
     required this.reading,
     required this.meaning,
     required this.example,
@@ -20,6 +22,7 @@ class Word {
     return Word(
       id: json['id'] as String? ?? '',
       word: json['word'] as String? ?? '',
+      wordEn: json['word_en'] as String? ?? '',
       reading: json['reading'] as String? ?? '',
       meaning: json['meaning'] as String? ?? '',
       example: json['example'] as String? ?? '',
@@ -31,6 +34,7 @@ class Word {
     return {
       'id': id,
       'word': word,
+      'word_en': wordEn,
       'reading': reading,
       'meaning': meaning,
       'example': example,
@@ -40,7 +44,7 @@ class Word {
 
   @override
   String toString() {
-    return 'Word(id: $id, word: $word, reading: $reading, meaning: $meaning, date: $date)';
+    return 'Word(id: $id, word: $word, wordEn: $wordEn, reading: $reading, meaning: $meaning, date: $date)';
   }
 
   @override
@@ -49,6 +53,7 @@ class Word {
     return other is Word &&
         other.id == id &&
         other.word == word &&
+        other.wordEn == wordEn &&
         other.reading == reading &&
         other.meaning == meaning &&
         other.example == example &&
@@ -59,6 +64,7 @@ class Word {
   int get hashCode {
     return id.hashCode ^
         word.hashCode ^
+        wordEn.hashCode ^
         reading.hashCode ^
         meaning.hashCode ^
         example.hashCode ^

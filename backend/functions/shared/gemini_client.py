@@ -27,11 +27,11 @@ class GeminiClient:
     
     SYSTEM_PROMPT = """あなたは日本語の語彙力トレーニングアプリのための単語生成AIです。
 
-あなたの役割は、指定された日付に対して抽象的で少し難しい日本語の名詞を生成することです。
+あなたの役割は、指定された日付に対して抽象的で少し難しい日本語の名詞を生成し、その英訳も提供することです。
 
 ## 出力ルール
 - 必ず以下のJSON形式のみで出力してください。説明文や追加のテキストは一切含めないでください。
-- 各単語は「word」(漢字表記)と「reading」(ひらがな読み)を含めてください。
+- 各単語は「word」(漢字表記)、「reading」(ひらがな読み)、「word_en」(英語訳)を含めてください。
 
 ## JSON形式
 {
@@ -39,7 +39,8 @@ class GeminiClient:
     {
       "date": "YYYY-MM-DD",
       "word": "単語",
-      "reading": "たんご"
+      "reading": "たんご",
+      "word_en": "English translation"
     }
   ]
 }
@@ -48,7 +49,7 @@ class GeminiClient:
 - 抽象的な概念を表す名詞を選ぶこと
 - 日常会話ではあまり使われないが、知っていると語彙力が高いと感じられる単語
 - 小学校高学年〜中学生レベルの漢字で構成される単語
-- 例: 概念、帰結、矛盾、逆説、恩恵、弊害、風潮、慣習、素養、気概"""
+- 例: 概念(concept)、帰結(consequence)、矛盾(contradiction)、逆説(paradox)、恩恵(blessing)"""
 
     def __init__(
         self,
@@ -154,14 +155,17 @@ class GeminiClient:
             validated_words = []
             
             for word in words:
-                if not all(k in word for k in ["date", "word", "reading"]):
+                if not all(k in word for k in ["date", "word", "reading", "word_en"]):
                     logger.warning(f"Skipping invalid word entry: {word}")
                     continue
                 validated_words.append({
                     "date": word["date"],
                     "word": word["word"],
-                    "reading": word["reading"]
+                    "reading": word["reading"],
+                    "word_en": word["word_en"]
                 })
+            
+            return validated_words
             
             return validated_words
             
@@ -173,6 +177,7 @@ class GeminiClient:
         word: str,
         answers: list[str],
         game_type: str,
+        locale: str = "ja",
     ) -> dict:
         """Score user answers for vocabulary game.
         
@@ -180,6 +185,7 @@ class GeminiClient:
             word: The target word (お題).
             answers: List of user's answers.
             game_type: "word_replacement" or "rhyming".
+            locale: Language for prompts ("ja" or "en").
             
         Returns:
             Dictionary with score (0-100) and feedback.
@@ -187,9 +193,29 @@ class GeminiClient:
         Raises:
             GeminiClientError: For API errors.
         """
-        game_context = self._get_game_context(game_type)
+        is_english = locale == "en"
+        game_context = self._get_game_context(game_type, is_english)
         
-        system_prompt = f"""あなたは言語学の専門家です。提示された『お題』に対して、ユーザーが入力した『単語リスト』を以下の基準で採点し、JSON形式で返してください。
+        if is_english:
+            system_prompt = f"""You are a linguistics expert. Score the user's word list against the given topic using the following criteria, and return your response in JSON format.
+
+Evaluation Criteria:
+{game_context}
+
+Response Format (must return in this exact JSON format):
+{{
+  "score": <integer from 0-100>,
+  "feedback": "<feedback in English including scoring reasons and suggestions for improvement>"
+}}
+
+Scoring Guidelines:
+- Each word is worth up to 10 points
+- Score up to 10 words maximum (100 points total)
+- Duplicate words are not scored
+- Inappropriate or irrelevant words score 0
+- Evaluate creativity and vocabulary richness"""
+        else:
+            system_prompt = f"""あなたは言語学の専門家です。提示された『お題』に対して、ユーザーが入力した『単語リスト』を以下の基準で採点し、JSON形式で返してください。
 
 評価基準：
 {game_context}
@@ -207,10 +233,21 @@ class GeminiClient:
 - 不適切または無関係な単語は0点
 - 創造性と語彙力の豊かさを評価"""
 
-        game_type_name = "言葉の置き換え" if game_type == "word_replacement" else "韻を踏む"
-        answers_text = "\n".join(f"・{a}" for a in answers) if answers else "（回答なし）"
-        
-        user_prompt = f"""【ゲーム種別】{game_type_name}
+        if is_english:
+            game_type_name = "Word Replacement" if game_type == "word_replacement" else "Rhyming"
+            answers_text = "\n".join(f"• {a}" for a in answers) if answers else "(No answers)"
+            user_prompt = f"""【Game Type】{game_type_name}
+
+【Topic】{word}
+
+【User's Answers】
+{answers_text}
+
+Please score the above answers."""
+        else:
+            game_type_name = "言葉の置き換え" if game_type == "word_replacement" else "韻を踏む"
+            answers_text = "\n".join(f"・{a}" for a in answers) if answers else "（回答なし）"
+            user_prompt = f"""【ゲーム種別】{game_type_name}
 
 【お題】{word}
 
@@ -238,15 +275,27 @@ class GeminiClient:
             logger.error(f"Gemini API error during scoring: {e}")
             raise GeminiClientError(f"Scoring API error: {e}") from e
 
-    def _get_game_context(self, game_type: str) -> str:
+    def _get_game_context(self, game_type: str, is_english: bool = False) -> str:
         """Get evaluation context for the game type."""
         if game_type == "word_replacement":
-            return """【言葉の置き換えゲーム】
+            if is_english:
+                return """【Word Replacement Game】
+- Evaluate words with the same or similar meaning to the topic word
+- Priority on appropriateness as synonyms
+- Higher scores for more refined expressions or specialized alternatives"""
+            else:
+                return """【言葉の置き換えゲーム】
 - お題の単語と同じ意味、または類似の意味を持つ単語を評価
 - 同義語、類義語としての適切さを重視
 - より洗練された表現や専門的な言い換えは高得点"""
         else:
-            return """【韻を踏むゲーム】
+            if is_english:
+                return """【Rhyming Game】
+- Evaluate whether words rhyme with the topic (matching end sounds)
+- Evaluate not just sound matching but also cleverness of the word
+- Higher scores for creative and unexpected rhymes"""
+            else:
+                return """【韻を踏むゲーム】
 - お題の単語と韻を踏んでいるか（語尾の音が一致しているか）を評価
 - 単なる音の一致だけでなく、言葉としての面白さも評価
 - 創造的で意外性のある韻は高得点"""

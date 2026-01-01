@@ -81,19 +81,25 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen> {
 
     _timer?.cancel();
 
+    // Get current locale
+    final locale = Localizations.localeOf(context).languageCode;
+    final isJapanese = locale == 'ja';
+    final displayWord = isJapanese ? widget.word.word : widget.word.wordEn.isNotEmpty ? widget.word.wordEn : widget.word.word;
+
     // Get scoring service and score the answers
     final scoringService = ref.read(scoringServiceProvider);
     final result = await scoringService.scoreAnswers(
-      word: widget.word.word,
+      word: displayWord,
       answers: _answers,
       gameType: widget.gameType,
+      locale: locale,
     );
 
     // Create and save the game score
     final gameScore = GameScore(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       gameType: widget.gameType,
-      word: widget.word.word,
+      word: displayWord,
       answers: _answers,
       score: result.score,
       feedback: result.feedback,
@@ -176,24 +182,30 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen> {
                 elevation: 4,
                 child: Padding(
                   padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        l10n.todaysWord,
-                        style:
-                            Theme.of(context).textTheme.titleSmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        widget.word.word,
-                        style:
-                            Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                      ),
-                    ],
+                  child: Builder(
+                    builder: (context) {
+                      final isJapanese = Localizations.localeOf(context).languageCode == 'ja';
+                      final displayWord = isJapanese ? widget.word.word : widget.word.wordEn.isNotEmpty ? widget.word.wordEn : widget.word.word;
+                      return Column(
+                        children: [
+                          Text(
+                            l10n.todaysWord,
+                            style:
+                                Theme.of(context).textTheme.titleSmall?.copyWith(
+                                      color: Theme.of(context).colorScheme.primary,
+                                    ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            displayWord,
+                            style:
+                                Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),

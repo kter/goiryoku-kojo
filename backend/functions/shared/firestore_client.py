@@ -79,7 +79,7 @@ class FirestoreClient:
         """Save generated words to Firestore.
         
         Args:
-            words: List of word dictionaries with 'date', 'word', 'reading' keys.
+            words: List of word dictionaries with 'date', 'word', 'reading', 'word_en' keys.
             
         Returns:
             Number of words saved.
