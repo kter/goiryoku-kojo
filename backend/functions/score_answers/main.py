@@ -152,6 +152,55 @@ def score_answers(request: Request) -> Response:
                 headers=headers,
             )
 
+        # Input size validation
+        MAX_ANSWERS_COUNT = 50
+        MAX_WORD_LENGTH = 200
+        MAX_ANSWER_LENGTH = 500
+
+        if len(answers) > MAX_ANSWERS_COUNT:
+            return Response(
+                json.dumps(
+                    {"success": False, "error": f"answers配列は最大{MAX_ANSWERS_COUNT}件までです"},
+                    ensure_ascii=False,
+                ),
+                status=HTTPStatus.BAD_REQUEST,
+                mimetype="application/json",
+                headers=headers,
+            )
+
+        if len(word) > MAX_WORD_LENGTH:
+            return Response(
+                json.dumps(
+                    {"success": False, "error": f"wordは最大{MAX_WORD_LENGTH}文字までです"},
+                    ensure_ascii=False,
+                ),
+                status=HTTPStatus.BAD_REQUEST,
+                mimetype="application/json",
+                headers=headers,
+            )
+
+        for i, answer in enumerate(answers):
+            if not isinstance(answer, str):
+                return Response(
+                    json.dumps(
+                        {"success": False, "error": f"answers[{i}]は文字列である必要があります"},
+                        ensure_ascii=False,
+                    ),
+                    status=HTTPStatus.BAD_REQUEST,
+                    mimetype="application/json",
+                    headers=headers,
+                )
+            if len(answer) > MAX_ANSWER_LENGTH:
+                return Response(
+                    json.dumps(
+                        {"success": False, "error": f"answers[{i}]は最大{MAX_ANSWER_LENGTH}文字までです"},
+                        ensure_ascii=False,
+                    ),
+                    status=HTTPStatus.BAD_REQUEST,
+                    mimetype="application/json",
+                    headers=headers,
+                )
+
         logger.info(f"Scoring answers for word: {word}, game_type: {game_type}, answers: {answers}")
 
         gemini_client = GeminiClient(project_id=PROJECT_ID)
