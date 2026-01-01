@@ -3,8 +3,11 @@
 import json
 import logging
 import os
+import time
 import traceback
+from collections import defaultdict
 from http import HTTPStatus
+from threading import Lock
 
 import functions_framework
 from flask import Request, Response
@@ -15,6 +18,59 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 PROJECT_ID = os.environ.get("GCP_PROJECT")
+
+# Rate limiting configuration
+RATE_LIMIT_WINDOW_SECONDS = 60  # 1 minute window
+RATE_LIMIT_MAX_REQUESTS = 10  # Max 10 requests per window
+
+# In-memory rate limiting storage
+# Note: This is per-instance and not shared across Cloud Functions instances
+_rate_limit_store: dict[str, list[float]] = defaultdict(list)
+_rate_limit_lock = Lock()
+
+
+def _get_client_ip(request: Request) -> str:
+    """Extract client IP from request, considering proxies."""
+    # X-Forwarded-For may contain multiple IPs; take the first one
+    forwarded_for = request.headers.get("X-Forwarded-For", "")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+    return request.remote_addr or "unknown"
+
+
+def _cleanup_old_requests(timestamps: list[float], window_start: float) -> list[float]:
+    """Remove timestamps older than the rate limit window."""
+    return [ts for ts in timestamps if ts > window_start]
+
+
+def _check_rate_limit(client_ip: str) -> tuple[bool, int]:
+    """Check if the client IP has exceeded the rate limit.
+    
+    Returns:
+        tuple: (is_allowed, retry_after_seconds)
+            - is_allowed: True if request is allowed, False if rate limited
+            - retry_after_seconds: Seconds until rate limit resets (0 if allowed)
+    """
+    current_time = time.time()
+    window_start = current_time - RATE_LIMIT_WINDOW_SECONDS
+    
+    with _rate_limit_lock:
+        # Cleanup old requests
+        _rate_limit_store[client_ip] = _cleanup_old_requests(
+            _rate_limit_store[client_ip], window_start
+        )
+        
+        request_count = len(_rate_limit_store[client_ip])
+        
+        if request_count >= RATE_LIMIT_MAX_REQUESTS:
+            # Calculate when the oldest request in the window will expire
+            oldest_in_window = min(_rate_limit_store[client_ip])
+            retry_after = int(oldest_in_window + RATE_LIMIT_WINDOW_SECONDS - current_time) + 1
+            return False, max(1, retry_after)
+        
+        # Record this request
+        _rate_limit_store[client_ip].append(current_time)
+        return True, 0
 
 
 @functions_framework.http
@@ -41,6 +97,29 @@ def score_answers(request: Request) -> Response:
         return Response("", status=HTTPStatus.NO_CONTENT, headers=headers)
 
     headers = {"Access-Control-Allow-Origin": "*"}
+
+    # Rate limiting check
+    client_ip = _get_client_ip(request)
+    is_allowed, retry_after = _check_rate_limit(client_ip)
+    
+    if not is_allowed:
+        logger.warning(f"Rate limit exceeded for IP: {client_ip}")
+        rate_limit_headers = {
+            **headers,
+            "Retry-After": str(retry_after),
+        }
+        return Response(
+            json.dumps(
+                {
+                    "success": False,
+                    "error": "リクエスト制限を超えました。しばらくしてから再度お試しください。",
+                },
+                ensure_ascii=False,
+            ),
+            status=HTTPStatus.TOO_MANY_REQUESTS,
+            mimetype="application/json",
+            headers=rate_limit_headers,
+        )
 
     try:
         request_json = request.get_json(silent=True)
