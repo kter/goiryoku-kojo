@@ -2,7 +2,7 @@ name: goiryoku_kojo
 description: "語彙力向上 - A vocabulary training app with word games"
 publish_to: 'none'
 
-version: 1.0.0+4
+version: 1.0.0+5
 
 environment:
   sdk: ^3.9.2
