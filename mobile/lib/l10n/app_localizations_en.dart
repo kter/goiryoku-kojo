@@ -96,14 +96,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scoreExcellent => 'Amazing! You\'re a vocabulary master! 🎉';
 
   @override
-  String get scoreGreat => 'Excellent work! 👏';
+  String get scoreGreat => 'Excellent work! Keep it up! 👏';
 
   @override
-  String get scoreGood => 'Good job! 💪';
+  String get scoreGood => 'Nice work! You\'re improving steadily! 💪';
 
   @override
-  String get scoreOkay => 'Keep practicing! 📚';
+  String get scoreOkay => 'Great effort! Practice makes perfect! 📚';
 
   @override
-  String get scoreNeedsWork => 'Try harder next time! 🌟';
+  String get scoreNeedsWork =>
+      'Nice try! Keep playing to boost your skills! 🌟';
 }

@@ -269,25 +269,25 @@ abstract class AppLocalizations {
   /// No description provided for @scoreGreat.
   ///
   /// In en, this message translates to:
-  /// **'Excellent work! 👏'**
+  /// **'Excellent work! Keep it up! 👏'**
   String get scoreGreat;
 
   /// No description provided for @scoreGood.
   ///
   /// In en, this message translates to:
-  /// **'Good job! 💪'**
+  /// **'Nice work! You\'re improving steadily! 💪'**
   String get scoreGood;
 
   /// No description provided for @scoreOkay.
   ///
   /// In en, this message translates to:
-  /// **'Keep practicing! 📚'**
+  /// **'Great effort! Practice makes perfect! 📚'**
   String get scoreOkay;
 
   /// No description provided for @scoreNeedsWork.
   ///
   /// In en, this message translates to:
-  /// **'Try harder next time! 🌟'**
+  /// **'Nice try! Keep playing to boost your skills! 🌟'**
   String get scoreNeedsWork;
 }
 
