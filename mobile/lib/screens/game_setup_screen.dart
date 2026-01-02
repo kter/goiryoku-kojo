@@ -19,8 +19,8 @@ class GameSetupScreen extends ConsumerStatefulWidget {
 }
 
 class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
-  int _selectedTimeLimit = 30;
-  final List<int> _timeLimitOptions = [30, 60, 90];
+  int _selectedTimeLimit = 60;
+  final List<int> _timeLimitOptions = [60, 180, 300];
 
   @override
   Widget build(BuildContext context) {
@@ -62,8 +62,9 @@ class _GameSetupScreenState extends ConsumerState<GameSetupScreen> {
                           if (word == null) {
                             return const Text('---');
                           }
-                          final isJapanese = Localizations.localeOf(context).languageCode == 'ja';
-                          final displayWord = isJapanese ? word.word : word.wordEn.isNotEmpty ? word.wordEn : word.word;
+                          final locale = Localizations.localeOf(context).languageCode;
+                          final isJapanese = locale == 'ja';
+                          final displayWord = word.getDisplayWord(locale);
                           return Column(
                             children: [
                               Text(

@@ -36,7 +36,7 @@ class GameScore {
           [],
       score: json['score'] as int? ?? 0,
       feedback: json['feedback'] as String? ?? '',
-      timeLimit: json['time_limit'] as int? ?? 30,
+      timeLimit: json['time_limit'] as int? ?? 60,
       playedAt: DateTime.parse(
           json['played_at'] as String? ?? DateTime.now().toIso8601String()),
     );

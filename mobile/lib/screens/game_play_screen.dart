@@ -83,8 +83,7 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen> {
 
     // Get current locale
     final locale = Localizations.localeOf(context).languageCode;
-    final isJapanese = locale == 'ja';
-    final displayWord = isJapanese ? widget.word.word : widget.word.wordEn.isNotEmpty ? widget.word.wordEn : widget.word.word;
+    final displayWord = widget.word.getDisplayWord(locale);
 
     // Get scoring service and score the answers
     final scoringService = ref.read(scoringServiceProvider);
@@ -184,8 +183,8 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen> {
                   padding: const EdgeInsets.all(20.0),
                   child: Builder(
                     builder: (context) {
-                      final isJapanese = Localizations.localeOf(context).languageCode == 'ja';
-                      final displayWord = isJapanese ? widget.word.word : widget.word.wordEn.isNotEmpty ? widget.word.wordEn : widget.word.word;
+                      final locale = Localizations.localeOf(context).languageCode;
+                      final displayWord = widget.word.getDisplayWord(locale);
                       return Column(
                         children: [
                           Text(
