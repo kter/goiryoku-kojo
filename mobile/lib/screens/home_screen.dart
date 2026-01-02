@@ -93,14 +93,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                         data: (word) {
                           if (word == null) {
                             return Text(
-                              'お題を取得中...',
+                              l10n.loading,
                               style: Theme.of(context).textTheme.headlineMedium,
                             );
                           }
+                          final locale = Localizations.localeOf(context).languageCode;
+                          final displayWord = word.getDisplayWord(locale);
+                          final isJapanese = locale == 'ja';
                           return Column(
                             children: [
                               Text(
-                                word.word,
+                                displayWord,
                                 style: Theme.of(context)
                                     .textTheme
                                     .headlineLarge
@@ -108,7 +111,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with RouteAware {
                                       fontWeight: FontWeight.bold,
                                     ),
                               ),
-                              if (word.reading.isNotEmpty) ...[
+                              if (isJapanese && word.reading.isNotEmpty) ...[
                                 const SizedBox(height: 4),
                                 Text(
                                   word.reading,

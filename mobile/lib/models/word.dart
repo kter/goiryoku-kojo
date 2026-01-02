@@ -47,6 +47,16 @@ class Word {
     return 'Word(id: $id, word: $word, wordEn: $wordEn, reading: $reading, meaning: $meaning, date: $date)';
   }
 
+  /// Returns the appropriate word based on locale.
+  /// For English, returns wordEn if available, otherwise falls back to word.
+  /// For Japanese (or other locales), returns word.
+  String getDisplayWord(String locale) {
+    if (locale == 'en') {
+      return wordEn.isNotEmpty ? wordEn : word;
+    }
+    return word;
+  }
+
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;

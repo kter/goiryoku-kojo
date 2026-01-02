@@ -39,8 +39,13 @@ final todaysWordProvider = FutureProvider<Word?>((ref) async {
   // Check if cache is valid
   if (cache.isCacheValid()) {
     final todaysWord = cache.getTodaysWord();
-    if (todaysWord != null) {
+    // Also check if wordEn is populated - if not, we need to refetch
+    if (todaysWord != null && todaysWord.wordEn.isNotEmpty) {
       return todaysWord;
+    }
+    // wordEn is empty, clear cache to force refetch
+    if (todaysWord != null && todaysWord.wordEn.isEmpty) {
+      await cache.clearCache();
     }
   }
 
