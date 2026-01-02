@@ -72,7 +72,7 @@ class GameResultScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        _getScoreMessage(gameScore.score),
+                        _getScoreMessage(context, gameScore.score),
                         style: Theme.of(context).textTheme.titleMedium,
                         textAlign: TextAlign.center,
                       ),
@@ -115,7 +115,7 @@ class GameResultScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '入力した回答',
+                        l10n.yourAnswers,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               color: Theme.of(context).colorScheme.primary,
                             ),
@@ -123,7 +123,7 @@ class GameResultScreen extends ConsumerWidget {
                       const SizedBox(height: 8),
                       if (gameScore.answers.isEmpty)
                         Text(
-                          '回答なし',
+                          l10n.noAnswers,
                           style: Theme.of(context).textTheme.bodyMedium,
                         )
                       else
@@ -214,17 +214,18 @@ class GameResultScreen extends ConsumerWidget {
     }
   }
 
-  String _getScoreMessage(int score) {
+  String _getScoreMessage(BuildContext context, int score) {
+    final l10n = AppLocalizations.of(context)!;
     if (score >= 90) {
-      return '素晴らしい！語彙力の達人です！🎉';
+      return l10n.scoreExcellent;
     } else if (score >= 80) {
-      return '素晴らしい成績です！👏';
+      return l10n.scoreGreat;
     } else if (score >= 60) {
-      return 'よく頑張りました！💪';
+      return l10n.scoreGood;
     } else if (score >= 40) {
-      return 'もう少し練習しましょう！📚';
+      return l10n.scoreOkay;
     } else {
-      return '次はもっと頑張りましょう！🌟';
+      return l10n.scoreNeedsWork;
     }
   }
 }
