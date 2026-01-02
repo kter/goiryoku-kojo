@@ -84,4 +84,25 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settings => '設定';
+
+  @override
+  String get yourAnswers => '入力した回答';
+
+  @override
+  String get noAnswers => '回答なし';
+
+  @override
+  String get scoreExcellent => '素晴らしい！語彙力の達人です！🎉';
+
+  @override
+  String get scoreGreat => '素晴らしい成績です！👏';
+
+  @override
+  String get scoreGood => 'よく頑張りました！💪';
+
+  @override
+  String get scoreOkay => 'もう少し練習しましょう！📚';
+
+  @override
+  String get scoreNeedsWork => '次はもっと頑張りましょう！🌟';
 }

@@ -85,4 +85,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings => 'Settings';
+
+  @override
+  String get yourAnswers => 'Your Answers';
+
+  @override
+  String get noAnswers => 'No answers';
+
+  @override
+  String get scoreExcellent => 'Amazing! You\'re a vocabulary master! 🎉';
+
+  @override
+  String get scoreGreat => 'Excellent work! 👏';
+
+  @override
+  String get scoreGood => 'Good job! 💪';
+
+  @override
+  String get scoreOkay => 'Keep practicing! 📚';
+
+  @override
+  String get scoreNeedsWork => 'Try harder next time! 🌟';
 }

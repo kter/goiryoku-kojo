@@ -34,5 +34,12 @@
   "loading": "Loading...",
   "error": "Error",
   "retry": "Retry",
-  "settings": "Settings"
+  "settings": "Settings",
+  "yourAnswers": "Your Answers",
+  "noAnswers": "No answers",
+  "scoreExcellent": "Amazing! You're a vocabulary master! 🎉",
+  "scoreGreat": "Excellent work! 👏",
+  "scoreGood": "Good job! 💪",
+  "scoreOkay": "Keep practicing! 📚",
+  "scoreNeedsWork": "Try harder next time! 🌟"
 }

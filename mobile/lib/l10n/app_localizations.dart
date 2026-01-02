@@ -247,6 +247,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Settings'**
   String get settings;
+
+  /// No description provided for @yourAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Answers'**
+  String get yourAnswers;
+
+  /// No description provided for @noAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'No answers'**
+  String get noAnswers;
+
+  /// No description provided for @scoreExcellent.
+  ///
+  /// In en, this message translates to:
+  /// **'Amazing! You\'re a vocabulary master! 🎉'**
+  String get scoreExcellent;
+
+  /// No description provided for @scoreGreat.
+  ///
+  /// In en, this message translates to:
+  /// **'Excellent work! 👏'**
+  String get scoreGreat;
+
+  /// No description provided for @scoreGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Good job! 💪'**
+  String get scoreGood;
+
+  /// No description provided for @scoreOkay.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep practicing! 📚'**
+  String get scoreOkay;
+
+  /// No description provided for @scoreNeedsWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Try harder next time! 🌟'**
+  String get scoreNeedsWork;
 }
 
 class _AppLocalizationsDelegate
